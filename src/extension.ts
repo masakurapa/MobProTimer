@@ -19,6 +19,14 @@ export function activate(context: vscode.ExtensionContext) {
 	const padding = (val: number) => val.toString().padStart(2, '0');
 	// set status bar text
 	const itemText = (mark: string) => {
+		if (time <= 10) {
+			item.color = COLOR3;
+		} else if (time <= 60) {
+			item.color = COLOR2;
+		} else {
+			item.color = COLOR1;
+		}
+
 		const h = Math.floor(time / (60 * 60));
 		const m = Math.floor((time - (h * 60 * 60)) / 60);
 		const s = time - (h * 60 * 60) - (m * 60);
@@ -35,20 +43,23 @@ export function activate(context: vscode.ExtensionContext) {
 		item.command = 'extension.pause';
 		item.tooltip = 'pause timer';
 		itemText(MARK_PAUSE);
+
 		interval = setInterval(() => {
+			time--;
 			itemText(MARK_PAUSE);
 			if (time === 0) {
 				time = (configInterval ? configInterval : 10)  * 60;
-				return;
-			}
-			time--;
 
-			if (time < 10) {
-				item.color = COLOR3;
-			} else if (time < 60) {
-				item.color = COLOR2;
-			} else {
-				item.color = COLOR1;
+				clearInterval(interval);
+				vscode.window.showInformationMessage("Time is Up!!", {
+					modal: true,
+				}).then(
+					() => {
+						vscode.commands.executeCommand('extension.start');
+					},
+					() => {}
+				);
+				return;
 			}
 		}, 1000);
 	});
