@@ -3,7 +3,7 @@
 	"publisher": "masakurapa",
 	"displayName": "MobProTimer",
 	"description": "mob programmimg timer",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/masakurapa/MobProTimer"
@@ -16,7 +16,8 @@
 	],
 	"activationEvents": [
 		"onCommand:extension.start",
-		"onCommand:extension.pause"
+		"onCommand:extension.pause",
+		"onCommand:extension.reset"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -28,6 +29,10 @@
 			{
 				"command": "extension.pause",
 				"title": "MobProTimer: Pause"
+			},
+			{
+				"command": "extension.reset",
+				"title": "MobProTimer: Reset"
 			}
 		],
 		"configuration": [

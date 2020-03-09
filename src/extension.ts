@@ -12,9 +12,12 @@ export function activate(context: vscode.ExtensionContext) {
 	const COLOR2 = '#FFFF00FF';
 	const COLOR3 = '#FF0000FF';
 
-	let interval: NodeJS.Timeout;
-	let time = (configInterval ? configInterval : 10)  * 60;
-
+	// init timer
+	const initTimer = () => (configInterval ? configInterval : 10)  * 60;
+	const clearTimerInterval = () => {
+		clearInterval(interval);
+		interval.unref();
+	};
 	// zero padding
 	const padding = (val: number) => val.toString().padStart(2, '0');
 	// set status bar text
@@ -33,6 +36,9 @@ export function activate(context: vscode.ExtensionContext) {
 		item.text = `${mark} ${padding(h)}:${padding(m)}:${padding(s)}`;
 	};
 
+	let interval: NodeJS.Timeout;
+	let time = initTimer();
+
 	const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 999);
 	itemText(MARK_START);
 	item.color = COLOR1;
@@ -40,6 +46,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// start timer
 	const start = vscode.commands.registerCommand('extension.start', () => {
+		if (interval !== undefined) {
+			clearTimerInterval();
+		}
+
 		item.command = 'extension.pause';
 		item.tooltip = 'pause timer';
 		itemText(MARK_PAUSE);
@@ -48,9 +58,9 @@ export function activate(context: vscode.ExtensionContext) {
 			time--;
 			itemText(MARK_PAUSE);
 			if (time === 0) {
-				time = (configInterval ? configInterval : 10)  * 60;
+				time = initTimer();
 
-				clearInterval(interval);
+				clearTimerInterval();
 				vscode.window.showInformationMessage("Time is Up!!", {
 					modal: true,
 				}).then(
@@ -68,12 +78,22 @@ export function activate(context: vscode.ExtensionContext) {
 	const pause = vscode.commands.registerCommand('extension.pause', () => {
 		item.command = 'extension.start';
 		item.tooltip = 'start timer';
-		clearInterval(interval);
+		clearTimerInterval();
+		itemText(MARK_START);
+	});
+
+	// reset timer
+	const reset = vscode.commands.registerCommand('extension.reset', () => {
+		item.command = 'extension.start';
+		item.tooltip = 'start timer';
+		clearTimerInterval();
+		time = initTimer();
 		itemText(MARK_START);
 	});
 
 	context.subscriptions.push(start);
 	context.subscriptions.push(pause);
+	context.subscriptions.push(reset);
 }
 
 export function deactivate() {}
